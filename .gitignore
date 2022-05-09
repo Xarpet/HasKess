@@ -1,0 +1,6 @@
+*.swp
+*.hi
+*.o
+*.exe
+
+List.md
