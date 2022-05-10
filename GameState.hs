@@ -7,7 +7,7 @@ data GameState = GameState
         activeColor :: Color,
         castlable :: Castlable,
         enPassantSquare :: Maybe Coordinate,
-        halfMoveClock :: Int,
+        halfMoveClock :: Int, --used to implement the fifty move rule
         fullMoveNumber :: Int
     } --Implement the FEN notation of chess
 
@@ -16,9 +16,10 @@ type Square = Maybe Piece
 data Piece = Piece {
     pieceType :: PieceType,
     pieceColor :: Color
-}
+} deriving Eq
 
 data PieceType = Pawn | Knight | Bishop | Rook | Queen | King
+    deriving Eq
 
 data Color = Black | White
     deriving (Show, Eq)
@@ -30,7 +31,7 @@ data Castlable = Castlable {
     blackQueenSide :: Bool
 } deriving (Show, Eq)
 
-newtype Coordinate = Coordinate (Char, Int)
+newtype Coordinate = Coordinate (Char, Int) -- in algerbraic notation
     deriving (Show, Eq)
 
 instance Show Piece where
@@ -62,11 +63,12 @@ readFENPiece 'r' = Left (Piece Rook Black)
 readFENPiece 'q' = Left (Piece Queen Black)
 readFENPiece 'k' = Left (Piece King Black)
 readFENPiece num = Right $ (read :: String -> Int) [num]
-
+-- instance read is too weird so this is a custom read function
 
 showBoard :: Board -> String
-showBoard = concatMap $ (++) "\n" . map (maybe '-' $ head . show)
-
+showBoard = concatMap ((++) "\n" . map (maybe '-' $ head . show)) . reverse
+-- replace '-' if you want other placeholder
+-- Note the reverse
 
 instance Show GameState where
     show (GameState board colorToPlay castlable enPassantSquare halfMoveClock fullMoveNumber) =
@@ -78,12 +80,13 @@ instance Show GameState where
         show fullMoveNumber
 
 initialGameState :: GameState
-initialGameState = GameState [[Just (Piece Rook Black),Just (Piece Knight Black),Just (Piece Bishop Black),Just (Piece Queen Black),Just (Piece King Black),Just (Piece Bishop Black),Just (Piece Knight Black),Just (Piece Rook Black)],
-                              [Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black)],
-                              [Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing],
-                              [Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing],
-                              [Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing],
-                              [Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing],
+initialGameState = GameState [[Just (Piece Rook White),Just (Piece Knight White),Just (Piece Bishop White),Just (Piece Queen White),Just (Piece King White),Just (Piece Bishop White),Just (Piece Knight White),Just (Piece Rook White)],
                               [Just (Piece Pawn White),Just (Piece Pawn White),Just (Piece Pawn White),Just (Piece Pawn White),Just (Piece Pawn White),Just (Piece Pawn White),Just (Piece Pawn White),Just (Piece Pawn White)],
-                              [Just (Piece Rook White),Just (Piece Knight White),Just (Piece Bishop White),Just (Piece Queen White),Just (Piece King White),Just (Piece Bishop White),Just (Piece Knight White),Just (Piece Rook White)]]
+                              [Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing],
+                              [Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing],
+                              [Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing],
+                              [Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing],
+                              [Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black)],
+                              [Just (Piece Rook Black),Just (Piece Knight Black),Just (Piece Bishop Black),Just (Piece Queen Black),Just (Piece King Black),Just (Piece Bishop Black),Just (Piece Knight Black),Just (Piece Rook Black)]]
                              White (Castlable True True True True) Nothing 0 1
+-- note now we start from a1 to h8.

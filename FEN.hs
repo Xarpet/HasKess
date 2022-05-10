@@ -7,7 +7,7 @@ split c str = case break (==c) str of
     (ls,[]) -> [ls]
     (ls,x:xs) -> ls : split c xs -- this function splits. break splits a list into two at a given condition
 
-parserRank :: [Char] -> [Maybe Piece]
+parserRank :: String -> [Maybe Piece]
 parserRank = concatMap $ readWithNum . readFENPiece
     where readWithNum (Left piece) = [Just piece]
           readWithNum (Right num) = replicate num Nothing
@@ -33,13 +33,14 @@ readCastlingRights :: String -> Castlable -> Castlable
 readCastlingRights str = case str of
     "-" -> id
     "" -> id
-    ('K':rs) -> (readCastlingRights rs) . (\x -> x {whiteKingSide = True})
-    ('Q':rs) -> (readCastlingRights rs) . (\x -> x {whiteQueenSide = True})
-    ('k':rs) -> (readCastlingRights rs) . (\x -> x {blackKingSide = True})
-    ('q':rs) -> (readCastlingRights rs) . (\x -> x {blackQueenSide = True})
+    ('K':rs) -> readCastlingRights rs . (\x -> x {whiteKingSide = True})
+    ('Q':rs) -> readCastlingRights rs . (\x -> x {whiteQueenSide = True})
+    ('k':rs) -> readCastlingRights rs . (\x -> x {blackKingSide = True})
+    ('q':rs) -> readCastlingRights rs . (\x -> x {blackQueenSide = True})
     _ -> id
+-- Currying to make recursion easier.
 
-showCastlingRights :: Castlable -> [Char]
+showCastlingRights :: Castlable -> String
 showCastlingRights (Castlable False False False False) = "-"
 showCastlingRights c@(Castlable True _ _ _)= "K" ++ showCastlingRights c{whiteKingSide = False}
 showCastlingRights c@(Castlable _ True _ _)= "Q" ++ showCastlingRights c{whiteQueenSide = False}
@@ -50,7 +51,7 @@ readEnPassantSquare :: String -> Maybe Coordinate
 readEnPassantSquare "-" = Nothing
 readEnPassantSquare str = Just $ Coordinate (head str, read [str !! 1] :: Int)
 
-showEnPassantSquare :: Maybe Coordinate -> [Char]
+showEnPassantSquare :: Maybe Coordinate -> String
 showEnPassantSquare Nothing = "-"
 showEnPassantSquare (Just (Coordinate c)) = fst c : show (snd c)
 
@@ -58,7 +59,7 @@ parserFEN :: String -> GameState
 parserFEN str =
     let list = words str in
         let boardList = split '/' $ head list in
-            GameState (map parserRank boardList) (readActiveColor $ list !! 1)
+            GameState (reverse $ map parserRank boardList) (readActiveColor $ list !! 1)
                       (readCastlingRights (list !! 2) $ Castlable False False False False)
                       (readEnPassantSquare $ list !! 3)
                       (read (list !! 4) :: Int)
