@@ -32,7 +32,7 @@ data Castlable = Castlable {
 } deriving (Show, Eq)
 
 newtype Coordinate = Coordinate (Char, Int) -- in algerbraic notation
-    deriving (Show, Eq)
+    deriving (Eq)
 
 instance Show Piece where
     show (Piece Pawn White) = "P"
@@ -70,6 +70,9 @@ showBoard = concatMap ((++) "\n" . map (maybe '-' $ head . show)) . reverse
 -- replace '-' if you want other placeholder
 -- Note the reverse
 
+instance Show Coordinate where
+    show (Coordinate (char, int)) = char : show int
+
 instance Show GameState where
     show (GameState board colorToPlay castlable enPassantSquare halfMoveClock fullMoveNumber) =
         showBoard board ++ "\n" ++
@@ -90,3 +93,7 @@ initialGameState = GameState [[Just (Piece Rook White),Just (Piece Knight White)
                               [Just (Piece Rook Black),Just (Piece Knight Black),Just (Piece Bishop Black),Just (Piece Queen Black),Just (Piece King Black),Just (Piece Bishop Black),Just (Piece Knight Black),Just (Piece Rook Black)]]
                              White (Castlable True True True True) Nothing 0 1
 -- note now we start from a1 to h8.
+
+opponent :: Color -> Color
+opponent White = Black
+opponent Black = White

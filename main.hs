@@ -1,5 +1,8 @@
 import GameState
 import FEN
+import Bitboard
+
 main :: IO ()
 main = do
-    putStrLn "This is HASKESS"
+    fen <- getLine
+    (putStrLn . showAllAttackSquares . bitboardStateFromComplex . fENToComplex) fen

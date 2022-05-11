@@ -5,13 +5,13 @@ We are using Rank-File bitboard mapping. So we start with a1 b1 c1 and work our 
 - Northeast: +9
 - West: -1
 - East: +1
-- Southeast: -9
+- Southwest: -9
 - South: -8
-- Southwest: -7
+- Southeast: -7
 
 And some hex constants:
 
-```pseudocode
+```
 a-file             0x0101010101010101
 h-file             0x8080808080808080
 1st rank           0x00000000000000FF
