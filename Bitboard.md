@@ -1,4 +1,6 @@
 We are using Rank-File bitboard mapping. So we start with a1 b1 c1 and work our way to h8
+This is called LERF
+https://gekomad.github.io/Cinnamon/BitboardCalculator/
 
 - Northwest : +7
 - North: +8
@@ -21,3 +23,5 @@ h1-a8 antidiagonal 0x0102040810204080
 light squares      0x55AA55AA55AA55AA
 dark squares       0xAA55AA55AA55AA55
 ```
+
+attacking squares: all the "possible" moves including taking ally pieces
