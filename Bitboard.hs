@@ -14,12 +14,7 @@ type Bitboard = Word64
 data StateComplex = StateComplex {
     gameState :: GameState,
     bitboardState :: BitboardState
-}
-
-gameStateFromComplex :: StateComplex -> GameState
-gameStateFromComplex (StateComplex gs _) = gs
-bitboardStateFromComplex :: StateComplex -> BitboardState
-bitboardStateFromComplex (StateComplex _ bs) = bs
+} deriving Show
 
 data Direction = NW | N | NE | W | E | SW | S | SE |
                 NWW | NNW | NNE | NEE | SWW | SSW | SSE | SEE

@@ -1,3 +1,4 @@
+{-# LANGUAGE RecordWildCards #-}
 module Move where
 
 import GameState
@@ -144,5 +145,179 @@ moveBitboard bs (Move EnPassant pawn@(Piece _ color) from to) =
         capturedCord White = to - 8 -- calculate the cord of taken pawn
         capturedCord Black = to + 8
 
-moveGameState :: GameState -> Move -> GameState
-moveGameState = undefined
+
+moveComplex :: StateComplex -> Move -> StateComplex -- note here we don't check the color == activeColor
+moveComplex (StateComplex GameState{..} bs)  move@(Move Relocate (Piece Pawn color) from to)
+    | capture == Nothing = StateComplex { -- if there isn't capture
+        gameState = GameState {
+            board = bitboardToBoard $ moveBitboard bs move,
+            activeColor = opponent activeColor,
+            castlable = castlable,
+            enPassantSquare = Nothing, -- capture is ofc nothing
+            halfMoveClock = 0, -- pawn moves are not counted as fifty move
+            fullMoveNumber = fullMoveNumber + 1
+        },
+        bitboardState = newBitboard
+    }
+    | from - to == 8 || from - to == (-8) = StateComplex { -- if pawn one-step move
+        gameState = GameState {
+            board = bitboardToBoard $ moveBitboard bs move,
+            activeColor = opponent activeColor,
+            castlable = castlable,
+            enPassantSquare = Nothing,
+            halfMoveClock = 0,
+            fullMoveNumber = fullMoveNumber + 1
+        },
+        bitboardState = newBitboard
+    }
+    | otherwise = StateComplex { -- if pawn two-step move
+        gameState = GameState {
+            board = bitboardToBoard $ moveBitboard bs move,
+            activeColor = opponent activeColor,
+            castlable = castlable,
+            enPassantSquare = Just $ bitToCoordinate (div (from + to) 2),
+            halfMoveClock = 0,
+            fullMoveNumber = fullMoveNumber + 1
+    },
+        bitboardState = newBitboard
+    }
+    where
+        capture = testSquareFromBitboard bs to
+        newBitboard = moveBitboard bs move
+
+moveComplex (StateComplex GameState{..} bs)  move@(Move Relocate piece@(Piece King color) from to) =
+    StateComplex {
+        gameState = GameState {
+            board = bitboardToBoard $ moveBitboard bs move,
+            activeColor = opponent activeColor,
+            castlable = loseCastleKing color castlable,
+            enPassantSquare = Nothing,
+            halfMoveClock = resetHalfMove,
+            fullMoveNumber = fullMoveNumber + 1
+        },
+        bitboardState = newBitboard
+    }
+    where
+        resetHalfMove
+            | testSquareFromBitboard bs to == Nothing = halfMoveClock + 1
+            | otherwise = 0 -- if captured then reset
+        newBitboard = moveBitboard bs move
+        loseCastleKing White c =
+            c {
+                whiteKingSide = False,
+                whiteQueenSide = False
+            }
+        loseCastleKing Black c =
+            c {
+                blackKingSide = False,
+                blackQueenSide = False
+            }
+
+moveComplex (StateComplex GameState{..} bs)  move@(Move Relocate piece@(Piece Rook color) from to) =
+    StateComplex {
+        gameState = GameState {
+            board = bitboardToBoard $ moveBitboard bs move,
+            activeColor = opponent activeColor,
+            castlable = loseCastleRook color from castlable,
+            enPassantSquare = Nothing,
+            halfMoveClock = resetHalfMove,
+            fullMoveNumber = fullMoveNumber + 1
+        },
+        bitboardState = newBitboard
+    }
+    where
+        resetHalfMove
+            | testSquareFromBitboard bs to == Nothing = halfMoveClock + 1
+            | otherwise = 0 -- if captured then reset
+        newBitboard = moveBitboard bs move
+        loseCastleRook White from c@Castlable{..}
+            | whiteKingSide && from == 7 =
+                c{
+                    whiteKingSide = False
+                }
+            | whiteQueenSide && from == 0 =
+                c{
+                    whiteQueenSide = False
+                }
+            | otherwise = c
+        loseCastleRook Black from c@Castlable{..}
+            | blackKingSide && from == 63 =
+                c{
+                    blackKingSide = False
+                }
+            | blackQueenSide && from == 56 =
+                c{
+                    blackQueenSide = False
+                }
+            | otherwise = c
+
+moveComplex (StateComplex GameState{..} bs)  move@(Move Relocate piece@(Piece kind color) from to) =
+    StateComplex {
+        gameState = GameState {
+            board = bitboardToBoard $ moveBitboard bs move,
+            activeColor = opponent activeColor,
+            castlable = castlable,
+            enPassantSquare = Nothing,
+            halfMoveClock = resetHalfMove,
+            fullMoveNumber = fullMoveNumber + 1
+        },
+        bitboardState = newBitboard
+    }
+    where
+        resetHalfMove
+            | testSquareFromBitboard bs to == Nothing = halfMoveClock + 1
+            | otherwise = 0
+        newBitboard = moveBitboard bs move
+
+moveComplex (StateComplex GameState{..} bs)  move@(Move Promote piece@(Piece kind color) from to) =
+    StateComplex {
+        gameState = GameState {
+            board = bitboardToBoard $ moveBitboard bs move,
+            activeColor = opponent activeColor,
+            castlable = castlable,
+            enPassantSquare = Nothing,
+            halfMoveClock = 0,
+            fullMoveNumber = fullMoveNumber + 1
+        },
+        bitboardState = newBitboard
+    }
+    where
+        newBitboard = moveBitboard bs move
+
+moveComplex (StateComplex GameState{..} bs)  move@(Move Castle piece@(Piece kind color) from to) =
+    StateComplex {
+        gameState = GameState {
+            board = bitboardToBoard $ moveBitboard bs move,
+            activeColor = opponent activeColor,
+            castlable = resetCastle color castlable, -- this player cannot castle anymore
+            enPassantSquare = Nothing,
+            halfMoveClock = halfMoveClock + 1, -- no capture or pawn move
+            fullMoveNumber = fullMoveNumber + 1
+        },
+        bitboardState = newBitboard
+    }
+    where
+        resetCastle White c = c{
+            whiteKingSide = False,
+            whiteQueenSide = False
+        }
+        resetCastle Black c = c{
+            blackKingSide = False,
+            blackQueenSide = False
+        }
+        newBitboard = moveBitboard bs move
+
+moveComplex (StateComplex GameState{..} bs)  move@(Move EnPassant piece@(Piece kind color) from to) =
+    StateComplex {
+        gameState = GameState {
+            board = bitboardToBoard $ moveBitboard bs move,
+            activeColor = opponent activeColor,
+            castlable = castlable,
+            enPassantSquare = Nothing, -- obviously cannot enpassant
+            halfMoveClock = 0, -- it is a capture
+            fullMoveNumber = fullMoveNumber + 1
+        },
+        bitboardState = newBitboard
+    }
+    where
+        newBitboard = moveBitboard bs move
