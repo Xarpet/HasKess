@@ -114,6 +114,16 @@ showBitboardCount :: Int -> Bitboard -> String
 showBitboardCount 0 _ = []
 showBitboardCount count b = head (show (mod b 2)) : showBitboardCount (count - 1) (div b 2)
 
+bitboardToFlippedIndex :: Bitboard -> [Int]
+bitboardToFlippedIndex b =
+    trueIndex [] $ zip [0,1..63] $ bitboardToList b
+    where
+        bitboardToList x = map (testBit x) [0,1..63] -- bitboard to [bool]
+        trueIndex res [] = res
+        trueIndex res (x:xs)
+            | snd x = trueIndex (fst x:res) xs
+            | otherwise = trueIndex res xs
+
 instance Show BitboardState where
     show bs@(BitboardState a b c d e f g h i j k l) =
         "\nwhitePawn\n" ++

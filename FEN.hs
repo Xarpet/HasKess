@@ -13,7 +13,7 @@ parserRank = concatMap $ readWithNum . readFENPiece
           readWithNum (Right num) = replicate num Nothing
 
 showFENBoard :: Board -> String
-showFENBoard = concatMap $ foldr compressFEN "/"
+showFENBoard = concatMap (foldr compressFEN "/") . reverse
     where
         compressFEN Nothing (x:xs)
             | x `elem` ['1'..'9'] = succ x : xs
@@ -40,12 +40,13 @@ readCastlingRights str = case str of
     _ -> id
 -- Currying to make recursion easier.
 
-showCastlingRights :: Castlable -> String
-showCastlingRights (Castlable False False False False) = "-"
-showCastlingRights c@(Castlable True _ _ _)= "K" ++ showCastlingRights c{whiteKingSide = False}
-showCastlingRights c@(Castlable _ True _ _)= "Q" ++ showCastlingRights c{whiteQueenSide = False}
-showCastlingRights c@(Castlable _ _ True _)= "k" ++ showCastlingRights c{blackKingSide = False}
-showCastlingRights c@(Castlable _ _ _ True)= "q"
+showCastlingRights :: Bool -> Castlable -> String -- Bool is to detect whether it is called recursively or not
+showCastlingRights True (Castlable False False False False) = "-"
+showCastlingRights False (Castlable False False False False) = ""
+showCastlingRights _ c@(Castlable True _ _ _)= "K" ++ showCastlingRights False c{whiteKingSide = False}
+showCastlingRights _ c@(Castlable _ True _ _)= "Q" ++ showCastlingRights False c{whiteQueenSide = False}
+showCastlingRights _ c@(Castlable _ _ True _)= "k" ++ showCastlingRights False c{blackKingSide = False}
+showCastlingRights _ c@(Castlable _ _ _ True)= "q"
 
 readEnPassantSquare :: String -> Maybe Coordinate
 readEnPassantSquare "-" = Nothing
@@ -67,9 +68,9 @@ parserFEN str =
 
 showFEN :: GameState -> String
 showFEN s =
-    init(showFENBoard (board s)) ++ " " ++
+    init (showFENBoard (board s)) ++ " " ++
     showActiveColor (activeColor s) ++ " " ++
-    showCastlingRights (castlable s) ++ " " ++
+    showCastlingRights True (castlable s) ++ " " ++
     showEnPassantSquare (enPassantSquare s) ++ " " ++
     show (halfMoveClock s) ++ " " ++
     show (fullMoveNumber s)

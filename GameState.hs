@@ -66,16 +66,20 @@ readFENPiece num = Right $ (read :: String -> Int) [num]
 -- instance read is too weird so this is a custom read function
 
 showBoard :: Board -> String
-showBoard = concatMap ((++) "\n" . map (maybe '-' $ head . show)) . reverse
+showBoard = concatMap ((++) "\n" . map (maybe '—' $ head . show)) . reverse
 -- replace '-' if you want other placeholder
 -- Note the reverse
 
 instance Show Coordinate where
     show (Coordinate (char, int)) = char : show int
 
+readCoordinate :: String -> Coordinate
+readCoordinate (file:rank) = Coordinate (file, read rank :: Int)
+readCoordinate _ = error "Wrong Coordinate"
+
 instance Show GameState where
     show (GameState board colorToPlay castlable enPassantSquare halfMoveClock fullMoveNumber) =
-        showBoard board ++ "\n" ++
+        showBoard board ++ "\n\n" ++
         show colorToPlay ++ " to move\n" ++
         show castlable ++ "\nEn Passant Square: " ++
         show enPassantSquare ++ "\nHalf Move Clock: " ++
