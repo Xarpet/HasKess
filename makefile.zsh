@@ -1,0 +1,1 @@
+ghc -dynamic Main.hs -o main -lnnueprobe -L. -optl-Wl,-rpath,'$ORIGIN'

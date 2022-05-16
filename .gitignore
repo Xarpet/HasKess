@@ -2,7 +2,9 @@
 *.hi
 *.o
 *.exe
+*.txt
 
 List.md
 Bitboard.md
 Lerf.jpg
+testmove.md

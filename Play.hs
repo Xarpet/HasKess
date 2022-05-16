@@ -1,4 +1,5 @@
 module Play where
+
 import GameState
 import FEN
 import Bitboard
@@ -6,6 +7,9 @@ import Move
 
 initial :: StateComplex
 initial = fENToComplex "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
+test :: StateComplex
+test = fENToComplex "7k/6NP/Q7/8/Q1Q5/8/4p3/7K w - - 0 1"
 
 displayInCheck :: Bool -> String
 displayInCheck True = "\ESC[33mYou are in check. You must get out of check\ESC[0m"

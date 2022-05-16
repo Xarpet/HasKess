@@ -374,6 +374,8 @@ readMove str
         to = coordinateToBit $ readCoordinate $ take 2 $ drop 2 $ tail str
         fromLeft (Left x) = x
 
+-- Read Algebraic Notation
+
 preParserAN :: String -> String -- omit all symbols
 preParserAN str
     | last str == '+' || last str == '#' =
@@ -387,14 +389,15 @@ parserAN str sc@(StateComplex GameState{..} bs)
     | str == "0-0" || str == "O-O" = -- short castle
         Move Castle (Piece King activeColor) coordOfKing (coordOfKing + 2)
     | last (init str) == '=' =  -- promotion
-        Move Promote (charToPiece activeColor $ last str) (snd $ readPiece getRidEqual sc Promote) $ to getRidEqual
+        Move Promote (charToPiece activeColor $ last str) (snd $ readPiece (withoutx getRidEqual) sc Promote) $ to (withoutx getRidEqual)
         -- Because we defined the mover as the piece we promote to.
     | threeToLast str == 'x' && testSquareFromBitboard bs (to str) == Nothing =
-        uncurry (Move EnPassant) (readPiece str sc EnPassant) $ to str
+        uncurry (Move EnPassant) (readPiece (withoutx str) sc EnPassant) $ to str
         -- the condition for enPassant: capture symbol but the *to* square is empty
         -- Enpassant is in essence, no different than regular capturing/relocating
+        -- get rid of the x
     | threeToLast str == 'x' =
-        uncurry (Move Relocate) (readPiece (exceptLast3 str ++ last2 str) sc Relocate) $ to str
+        uncurry (Move Relocate) (readPiece (withoutx str) sc Relocate) $ to str
         -- get rid of the x
     | otherwise =
         uncurry (Move Relocate) (readPiece str sc Relocate) $ to str
@@ -404,6 +407,7 @@ parserAN str sc@(StateComplex GameState{..} bs)
             | otherwise = 60
         getRidEqual = (init . init) str-- get rid of =
         to str = coordinateToBit $ readCoordinate (last2 str)
+        withoutx s = exceptLast3 s ++ last2 s
         charToPiece color 'Q' = Piece Queen color
         charToPiece color 'R' = Piece Rook color
         charToPiece color 'B' = Piece Bishop color

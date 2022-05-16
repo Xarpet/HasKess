@@ -1,4 +1,9 @@
+module Main where
+
 import Play
+import NNUE
 
 main :: IO ()
-main = play initial
+main = do
+    putStrLn "Hi,"
+    testeval
