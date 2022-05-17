@@ -9,3 +9,8 @@ Currently completed:
 
 To be done:
 - GUI support and a simple chess engine.
+
+
+Acknowledgments:
+A huge thank you to Daniel Shawul for his amazing tool for integrating NNUE into HasKess
+https://github.com/dshawul/nnue-probe
