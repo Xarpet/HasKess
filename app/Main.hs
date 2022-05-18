@@ -1,16 +1,15 @@
-import Play
-import NNUE
-import Eval
-import MoveGeneration
-import FEN
-import Bitboard
-import GameState
-import Move
-
+import Play ( play )
+import NNUE ( initializeNNUE )
+import MoveGeneration ()
+import Bitboard ( fENToComplex )
 
 main :: IO ()
 main = do
-    -- print $ map showMove $ legalMoves initialSC
     _ <- initializeNNUE
-    print $ evalBoard initialSC
-    print $ evalBoard testSC
+    putStrLn "Input fen"
+    fen <- getLine
+    let sc = fENToComplex fen
+    play sc
+    -- fen <- getLine
+    -- print $ eval $ fENToComplex fen
+    -- main

@@ -1,6 +1,14 @@
+{-# LANGUAGE BangPatterns #-}
 module FEN
     where
 import GameState
+    ( Coordinate(..),
+      Castlable(..),
+      Color(..),
+      Piece,
+      Board,
+      GameState(GameState),
+      readFENPiece )
 
 split :: Char -> String -> [String]
 split c str = case break (==c) str of
@@ -61,17 +69,11 @@ parserFEN :: String -> GameState
 parserFEN str =
     let list = words str in
         let boardList = split '/' $ head list in
-            GameState (reverse $ map parserRank boardList) (readActiveColor $ list !! 1)
+            GameState (readActiveColor $ list !! 1)
                       (readCastlingRights (list !! 2) $ Castlable False False False False)
                       (readEnPassantSquare $ list !! 3)
                       (read (list !! 4) :: Int)
                       (read (list !! 5) :: Int)
 
-showFEN :: GameState -> String
-showFEN s =
-    init (showFENBoard (board s)) ++ " " ++
-    showActiveColor (activeColor s) ++ " " ++
-    showCastlingRights True (castlable s) ++ " " ++
-    showEnPassantSquare (enPassantSquare s) ++ " " ++
-    show (halfMoveClock s) ++ " " ++
-    show (fullMoveNumber s)
+fENToBoard :: String -> Board
+fENToBoard str = reverse $ map parserRank $ split '/' $ head (words str)

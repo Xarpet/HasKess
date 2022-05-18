@@ -1,16 +1,29 @@
 # HasKess
- A Haskell Chess Engine.
-Hi! This is HasKess. 
-Currently completed:
-- regular board representation
-- support for FEN (both parsing and showing)
-- piece movement with bitboard 
-- Move legality check with FIDE compliant ruleset
+ A Haskell Chess AI/Engine. Compact, powerful,  and most importantly *Functional*.
+
+Currently, HasKess supports:
+
+- Chess Interface
+
+  - Full chess play with FIDE compliant rule set
+  - 64-bit board representation (Bitboard)
+
+  - support for FEN (both parsing and showing)
+
+  - support for reading algebraic notation with disambiguation
+
+- AI:
+
+  - Minimax search algorithm, with alpha-beta pruning.
+  - Evaluation function with Efficiently Updatable Neural Network
 
 To be done:
-- GUI support and a simple chess engine.
-
+- Universal Chess Interface support
+- Better optimization of Foreign Function Interfacing
+- Quiescence Search
+- Transposition table
+- End game database
 
 Acknowledgments:
-A huge thank you to Daniel Shawul for his amazing tool for integrating NNUE into HasKess
+A huge thank you to Daniel Shawul for his amazing tool helping integrating NNUE into HasKess
 https://github.com/dshawul/nnue-probe

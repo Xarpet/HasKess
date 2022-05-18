@@ -2,12 +2,25 @@
 module MoveGeneration where
 
 import GameState
+    ( Color(Black, White),
+      PieceType(King, Pawn, Queen, Rook, Bishop, Knight),
+      Piece(Piece),
+      GameState(GameState, fullMoveNumber, halfMoveClock,
+                enPassantSquare, castlable, activeColor) )
 import Move
-import FEN
+    ( Move(Move),
+      MoveType(Relocate, EnPassant, Promote, Castle),
+      moveLegality )
 import Bitboard
+    ( StateComplex(StateComplex),
+      colorInBitboardState,
+      bitboardToFlippedIndex,
+      testSquareFromBitboard,
+      singlePieceAttackSquares,
+      singlePieceMoveSquares )
 
-import Data.Bits
-import Data.Word
+import Data.Bits ( Bits(testBit) )
+import Data.Word ( Word64 )
 
 
 legalMoves :: StateComplex -> [Move]
@@ -16,7 +29,9 @@ legalMoves sc@(StateComplex GameState{..} bs) =
     where
         legal = legalMovePiece sc
         allyIndex = bitboardToFlippedIndex $ colorInBitboardState activeColor bs
-        fromJust (Just a) = a
+        fromJust (Just a) = a'
+{-# INLINE legalMoves #-}
+
 
 legalMovePiece :: StateComplex -> Int -> Piece -> [Move]
 legalMovePiece sc@(StateComplex GameState{..} bs) from piece@(Piece Pawn color) =
@@ -38,6 +53,7 @@ legalMovePiece sc@(StateComplex GameState{..} bs) from piece@(Piece Pawn color) 
                       Move Promote (Piece Rook activeColor) from to,
                       Move Promote (Piece Bishop activeColor) from to,
                       Move Promote (Piece Knight activeColor) from to]
+
 
 legalMovePiece sc@(StateComplex GameState{..} bs) from piece@(Piece King color) =
     filter legalQ allMoves

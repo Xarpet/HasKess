@@ -1,14 +1,30 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE BangPatterns #-}
 module Bitboard where
 
 import GameState
+    ( Coordinate(..),
+      Color(..),
+      PieceType(King, Pawn, Knight, Bishop, Rook, Queen),
+      Piece(Piece),
+      Board,
+      GameState(activeColor, castlable, enPassantSquare, halfMoveClock,
+                fullMoveNumber),
+      opponent )
 import FEN
-import Data.Word
+    ( showFENBoard,
+      showActiveColor,
+      showCastlingRights,
+      showEnPassantSquare,
+      parserFEN,
+      fENToBoard )
+import Data.Word ( Word64 )
 import Data.Bits
-import Data.List
+    ( Bits(bit, (.&.), (.|.), xor, popCount, zeroBits, setBit, testBit,
+           shift, complement) )
+import Data.List ( unfoldr )
 import qualified Data.Vector.Storable as VS
-import Foreign.Ptr
-import Foreign.C.Types
+import Foreign.C.Types ( CInt )
 
 -- definitions and fetch functions
 
@@ -228,10 +244,17 @@ testCoordinateFromBitboard :: BitboardState -> Coordinate -> Maybe Piece
 testCoordinateFromBitboard bs c = testSquareFromBitboard bs $ coordinateToBit c
 
 fENToComplex :: String -> StateComplex
-fENToComplex fen = StateComplex gs (boardToBitboard $ board gs) where
+fENToComplex fen = StateComplex gs (boardToBitboard $ fENToBoard fen) where
     gs = parserFEN fen
 
-
+showFEN :: StateComplex -> String
+showFEN (StateComplex s bs) =
+    init (showFENBoard $ bitboardToBoard bs) ++ " " ++
+    showActiveColor (activeColor s) ++ " " ++
+    showCastlingRights True (castlable s) ++ " " ++
+    showEnPassantSquare (enPassantSquare s) ++ " " ++
+    show (halfMoveClock s) ++ " " ++
+    show (fullMoveNumber s)
 
 -- piece movement
 

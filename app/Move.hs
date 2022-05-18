@@ -1,11 +1,38 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE BangPatterns #-}
 module Move where
 
 import GameState
-import FEN
+    ( Castlable(Castlable, whiteKingSide, whiteQueenSide,
+                blackKingSide, blackQueenSide),
+      Color(..),
+      PieceType(Pawn, King, Queen, Rook, Bishop, Knight),
+      Piece(Piece),
+      GameState(GameState, fullMoveNumber, halfMoveClock,
+                enPassantSquare, castlable, activeColor),
+      readFENPiece,
+      readCoordinate,
+      opponent )
 import Bitboard
+    ( BitboardState(whiteKing, blackKing),
+      StateComplex(..),
+      Bitboard,
+      emptyBitboard,
+      total,
+      pieceInBitboardState,
+      updatePieceInBitboardState,
+      colorInBitboardState,
+      intersectBitboard,
+      unionBitboard,
+      bitboardToFlippedIndex,
+      testSquareFromBitboard,
+      coordinateToBit,
+      bitToCoordinate,
+      pieceAttackSquares,
+      singlePieceAttackSquares,
+      singlePieceMoveSquares )
 
-import Data.Bits
+import Data.Bits ( Bits(bit, testBit, setBit, clearBit) )
 
 data MoveType = Relocate | Promote | Castle | EnPassant
     deriving (Eq, Show)
@@ -137,6 +164,7 @@ moveLegality move@(Move EnPassant mover@(Piece Pawn color) from to) (StateComple
 
 moveLegality (Move EnPassant (Piece _ _) _ _) _ = False
 
+{-# INLINE moveLegality #-}
 -- move -> board
 
 --Note that these two moves are UNCHECKED. The checking will be left to movecomplex
@@ -180,7 +208,6 @@ moveComplex :: StateComplex -> Move -> StateComplex -- note here we don't check 
 moveComplex (StateComplex GameState{..} bs)  move@(Move Relocate (Piece Pawn color) from to)
     | capture /= Nothing = StateComplex { -- if there is capture
         gameState = GameState {
-            board = bitboardToBoard $ moveBitboard bs move,
             activeColor = opponent activeColor,
             castlable = castlable,
             enPassantSquare = Nothing, -- capture is ofc nothing
@@ -191,7 +218,6 @@ moveComplex (StateComplex GameState{..} bs)  move@(Move Relocate (Piece Pawn col
     }
     | from - to == 8 || from - to == (-8) = StateComplex { -- if pawn one-step move
         gameState = GameState {
-            board = bitboardToBoard $ moveBitboard bs move,
             activeColor = opponent activeColor,
             castlable = castlable,
             enPassantSquare = Nothing,
@@ -202,7 +228,6 @@ moveComplex (StateComplex GameState{..} bs)  move@(Move Relocate (Piece Pawn col
     }
     | otherwise = StateComplex { -- if pawn two-step move
         gameState = GameState {
-            board = bitboardToBoard $ moveBitboard bs move,
             activeColor = opponent activeColor,
             castlable = castlable,
             enPassantSquare = Just $ bitToCoordinate (div (from + to) 2),
@@ -218,7 +243,6 @@ moveComplex (StateComplex GameState{..} bs)  move@(Move Relocate (Piece Pawn col
 moveComplex (StateComplex GameState{..} bs)  move@(Move Relocate piece@(Piece King color) from to) =
     StateComplex {
         gameState = GameState {
-            board = bitboardToBoard $ moveBitboard bs move,
             activeColor = opponent activeColor,
             castlable = loseCastleKing color castlable,
             enPassantSquare = Nothing,
@@ -246,7 +270,6 @@ moveComplex (StateComplex GameState{..} bs)  move@(Move Relocate piece@(Piece Ki
 moveComplex (StateComplex GameState{..} bs)  move@(Move Relocate piece@(Piece Rook color) from to) =
     StateComplex {
         gameState = GameState {
-            board = bitboardToBoard $ moveBitboard bs move,
             activeColor = opponent activeColor,
             castlable = loseCastleRook color from castlable,
             enPassantSquare = Nothing,
@@ -284,7 +307,6 @@ moveComplex (StateComplex GameState{..} bs)  move@(Move Relocate piece@(Piece Ro
 moveComplex (StateComplex GameState{..} bs)  move@(Move Relocate piece@(Piece kind color) from to) =
     StateComplex {
         gameState = GameState {
-            board = bitboardToBoard $ moveBitboard bs move,
             activeColor = opponent activeColor,
             castlable = castlable,
             enPassantSquare = Nothing,
@@ -302,7 +324,6 @@ moveComplex (StateComplex GameState{..} bs)  move@(Move Relocate piece@(Piece ki
 moveComplex (StateComplex GameState{..} bs)  move@(Move Promote piece@(Piece kind color) from to) =
     StateComplex {
         gameState = GameState {
-            board = bitboardToBoard $ moveBitboard bs move,
             activeColor = opponent activeColor,
             castlable = castlable,
             enPassantSquare = Nothing,
@@ -317,7 +338,6 @@ moveComplex (StateComplex GameState{..} bs)  move@(Move Promote piece@(Piece kin
 moveComplex (StateComplex GameState{..} bs)  move@(Move Castle piece@(Piece kind color) from to) =
     StateComplex {
         gameState = GameState {
-            board = bitboardToBoard $ moveBitboard bs move,
             activeColor = opponent activeColor,
             castlable = resetCastle color castlable, -- this player cannot castle anymore
             enPassantSquare = Nothing,
@@ -340,7 +360,6 @@ moveComplex (StateComplex GameState{..} bs)  move@(Move Castle piece@(Piece kind
 moveComplex (StateComplex GameState{..} bs)  move@(Move EnPassant piece@(Piece kind color) from to) =
     StateComplex {
         gameState = GameState {
-            board = bitboardToBoard $ moveBitboard bs move,
             activeColor = opponent activeColor,
             castlable = castlable,
             enPassantSquare = Nothing, -- obviously cannot enpassant

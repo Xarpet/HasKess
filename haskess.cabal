@@ -29,7 +29,12 @@ extra-source-files:
 
 executable haskess
     main-is:          Main.hs
-
+    ghc-options:
+        -O2
+        -threaded
+        -prof
+        -funbox-strict-fields
+        -fexpose-all-unfoldings
     -- Modules included in this executable, other than Main.
     other-modules:    Bitboard
                     , FEN
@@ -39,6 +44,7 @@ executable haskess
                     , Play
                     , Eval
                     , MoveGeneration
+                    , AI
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
     extra-lib-dirs:   .

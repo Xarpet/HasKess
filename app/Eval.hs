@@ -1,15 +1,36 @@
+{-# LANGUAGE BangPatterns #-}
 module Eval where
 
-import NNUE
+import NNUE ( arrayEval )
 import Bitboard
-import FEN
+    ( BitboardState,
+      StateComplex(StateComplex),
+      pieceInBitboardState,
+      totalValue,
+      bitboardToFlippedIndexCInt )
 import GameState
-import Move
+    ( Color(..),
+      PieceType(Queen, King, Pawn, Knight, Bishop, Rook),
+      Piece(Piece),
+      GameState(GameState, activeColor),
+      opponent )
+import Move ( complexInCheck )
+import MoveGeneration ( legalMoves )
 
 import Foreign.C.Types
 import qualified Data.Vector.Storable as VS
 import Foreign.ForeignPtr
 import GHC.IO (unsafePerformIO)
+
+
+data GameResult = CheckMate | StaleMate | Continue
+    deriving (Eq, Show)
+
+getGameResult :: StateComplex -> GameResult
+getGameResult sc
+    | complexInCheck sc && null (legalMoves sc) = CheckMate
+    | null (legalMoves sc) = StaleMate
+    | otherwise = Continue
 
 -- transform the board to CArray
 
@@ -49,14 +70,23 @@ bsToList bs = (pieces, squares) where
     turnPieceToList p = zip (repeat (pieceCode p)) $ bitboardToFlippedIndexCInt (pieceInBitboardState p bs)
     -- maybe it would be faster to generate this from Board. But whatever
 
-evalBoard :: StateComplex -> Int
-evalBoard (StateComplex GameState{activeColor = color} bs) =
-    fromEnum $ unsafePerformIO $ arrayEval (colorToCInt color) pieces squares
-    where
-        (p,s) = bsToList bs
-        pieces = VS.fromList $ p ++ [0]
-        squares = VS.fromList s
+eval :: StateComplex -> Int
+eval sc@(StateComplex GameState{activeColor = color} bs)
+    | res == CheckMate = minBound
+    | res == StaleMate = 0
+    | otherwise = fromEnum $ unsafePerformIO $ arrayEval (colorToCInt color) pieces squares
+        where
+            res = getGameResult sc
+            (p,s) = bsToList bs
+            pieces = VS.fromList $ p ++ [0]
+            squares = VS.fromList s
+{-# INLINE eval #-}
 
+
+
+eval' :: StateComplex -> Int
+eval' (StateComplex GameState{activeColor = color} bs) =
+    totalValue color bs - totalValue (opponent color) bs
 
 -- interface
 -- /**

@@ -1,9 +1,9 @@
+{-# LANGUAGE BangPatterns #-}
 module GameState
     where
 
 data GameState = GameState
     {
-        board :: Board,
         activeColor :: Color,
         castlable :: Castlable,
         enPassantSquare :: Maybe Coordinate,
@@ -11,7 +11,7 @@ data GameState = GameState
         fullMoveNumber :: Int
     } --Implement the FEN notation of chess
 
-type Board = [[Square]]
+type Board = [[Square]] -- note here that Board is only used for auxillary purpose
 type Square = Maybe Piece
 data Piece = Piece {
     pieceType :: PieceType,
@@ -78,25 +78,14 @@ readCoordinate (file:rank) = Coordinate (file, read rank :: Int)
 readCoordinate _ = error "Wrong Coordinate"
 
 instance Show GameState where
-    show (GameState board colorToPlay castlable enPassantSquare halfMoveClock fullMoveNumber) =
-        showBoard board ++ "\n\n" ++
+    show (GameState colorToPlay castlable enPassantSquare halfMoveClock fullMoveNumber) =
+        "\n" ++
         show colorToPlay ++ " to move\n" ++
         show castlable ++ "\nEn Passant Square: " ++
         show enPassantSquare ++ "\nHalf Move Clock: " ++
         show halfMoveClock ++ "\nTotal Move: " ++
         show fullMoveNumber
 
-initialGameState :: GameState
-initialGameState = GameState [[Just (Piece Rook White),Just (Piece Knight White),Just (Piece Bishop White),Just (Piece Queen White),Just (Piece King White),Just (Piece Bishop White),Just (Piece Knight White),Just (Piece Rook White)],
-                              [Just (Piece Pawn White),Just (Piece Pawn White),Just (Piece Pawn White),Just (Piece Pawn White),Just (Piece Pawn White),Just (Piece Pawn White),Just (Piece Pawn White),Just (Piece Pawn White)],
-                              [Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing],
-                              [Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing],
-                              [Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing],
-                              [Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing,Nothing],
-                              [Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black),Just (Piece Pawn Black)],
-                              [Just (Piece Rook Black),Just (Piece Knight Black),Just (Piece Bishop Black),Just (Piece Queen Black),Just (Piece King Black),Just (Piece Bishop Black),Just (Piece Knight Black),Just (Piece Rook Black)]]
-                             White (Castlable True True True True) Nothing 0 1
--- note now we start from a1 to h8.
 
 opponent :: Color -> Color
 opponent White = Black
