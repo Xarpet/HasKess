@@ -1,6 +1,6 @@
 ghc-8.10.7 -dynamic Main.hs -o main -lnnueprobe -L. -optl-Wl,-rpath,'$ORIGIN' -fprof-auto
-
+# to run, cabal run haskess -- +RTS -Nx -A300M
 # ghci -lnnueprobe
-# note that you need .so and .nnue at /usr/lib or any other directory that ld looks at. 
-# Use ld -l*libname* --verbose
+# note you need to pass the current directory to ld in order to link
+# Use ld -L. -l*libname* --verbose
 

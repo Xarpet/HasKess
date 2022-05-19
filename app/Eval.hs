@@ -31,7 +31,7 @@ getGameResult sc
     | complexInCheck sc && null (legalMoves sc) = CheckMate
     | null (legalMoves sc) = StaleMate
     | otherwise = Continue
-
+-- {-# SCC getGameResult #-}
 -- transform the board to CArray
 
 pieceCode :: Piece -> CInt
@@ -80,6 +80,7 @@ eval sc@(StateComplex GameState{activeColor = color} bs)
             (p,s) = bsToList bs
             pieces = VS.fromList $ p ++ [0]
             squares = VS.fromList s
+-- {-# SCC eval #-}
 {-# INLINE eval #-}
 
 
@@ -88,6 +89,9 @@ eval' :: StateComplex -> Int
 eval' (StateComplex GameState{activeColor = color} bs) =
     totalValue color bs - totalValue (opponent color) bs
 
+
+evalTest :: StateComplex -> Int
+evalTest _ = 1
 -- interface
 -- /**
 -- * Evaluation subroutine suitable for chess engines.

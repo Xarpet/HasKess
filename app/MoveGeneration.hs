@@ -22,14 +22,15 @@ import Bitboard
 import Data.Bits ( Bits(testBit) )
 import Data.Word ( Word64 )
 
-
 legalMoves :: StateComplex -> [Move]
 legalMoves sc@(StateComplex GameState{..} bs) =
+    -- {-# SCC legalMoves #-}
     concatMap (uncurry legal . (\x -> (x,fromJust $ testSquareFromBitboard bs x))) allyIndex
     where
         legal = legalMovePiece sc
+        -- {-# SCC legalMovePiece #-}
         allyIndex = bitboardToFlippedIndex $ colorInBitboardState activeColor bs
-        fromJust (Just a) = a'
+        fromJust (Just a) = a
 {-# INLINE legalMoves #-}
 
 

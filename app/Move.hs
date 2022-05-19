@@ -34,8 +34,8 @@ import Bitboard
 
 import Data.Bits ( Bits(bit, testBit, setBit, clearBit) )
 
-data MoveType = Relocate | Promote | Castle | EnPassant
-    deriving (Eq, Show)
+data MoveType = Promote | Castle | EnPassant | Relocate
+    deriving (Eq, Show, Ord)
 
 data Move = Move {
     moveType :: MoveType,

@@ -12,4 +12,5 @@ cabal.project.local
 haskess.prof
 CHANGELOG.md
 
-dist-newstyle/
+dist-newstyle/*
+.VSCodeCounter/

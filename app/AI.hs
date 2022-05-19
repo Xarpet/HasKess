@@ -7,16 +7,21 @@ import MoveGeneration ( legalMoves )
 import Bitboard ( StateComplex )
 import Move ( Move, moveComplex )
 
-data MoveValue = MoveValue (Move, Int)
-    deriving (Eq, Show)
--- implemented: minimax
+newtype MoveValue = MoveValue (Move, Int)
+    deriving Eq
+-- implemented: 
+-- minimax
+-- alpha-beta pruning
 -- yet implemented:
 -- Quiescence Search
--- alphaBeta pruning
--- 
+-- principal variation search
+-- null move pruning
 
 instance Ord MoveValue where
     (MoveValue (move1, i1)) <= MoveValue (move2, i2) = i1 <= i2
+
+instance Show MoveValue where
+    show (MoveValue (move,i)) = show move ++ show i
 
 minimax :: Int -> Int -> Int -> StateComplex -> Int -- white wants to maximize the value, while black want to minimize.
 minimax 0 alpha beta sc =

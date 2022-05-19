@@ -1,3 +1,10 @@
+# Installation
+Before running cabal build, please execute:
+
+`cp libnnueprobe.so /usr/lib/libnnueprobe.so`
+
+Since GHC has problem handling relative path in dynamic linking.
+
 # HasKess
  A Haskell Chess AI/Engine. Compact, powerful,  and most importantly *Functional*.
 
@@ -23,6 +30,7 @@ To be done:
 - Quiescence Search
 - Transposition table
 - End game database
+
 
 Acknowledgments:
 A huge thank you to Daniel Shawul for his amazing tool helping integrating NNUE into HasKess
