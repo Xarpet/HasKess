@@ -11,6 +11,7 @@ testmove.md
 cabal.project.local
 haskess.prof
 CHANGELOG.md
+a.out
 
 dist-newstyle/*
 .VSCodeCounter/
