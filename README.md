@@ -34,6 +34,6 @@ To be done:
 - End game database
 
 
-Acknowledgments:
+# Acknowledgments
 A huge thank you to Daniel Shawul for his amazing tool helping integrating NNUE into HasKess
 https://github.com/dshawul/nnue-probe
