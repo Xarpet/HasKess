@@ -1,3 +1,5 @@
+![HasKess](https://repository-images.githubusercontent.com/490344003/fd08bb91-7c93-4f8d-b1b0-9e69121aeb93)
+
 # Installation
 Before running cabal build, please execute:
 
@@ -32,6 +34,6 @@ To be done:
 - End game database
 
 
-Acknowledgments:
+# Acknowledgments
 A huge thank you to Daniel Shawul for his amazing tool helping integrating NNUE into HasKess
 https://github.com/dshawul/nnue-probe
