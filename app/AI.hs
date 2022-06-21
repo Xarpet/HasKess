@@ -4,6 +4,7 @@ module AI where
 
 import Eval ( eval )
 import MoveGeneration ( legalMoves )
+import NewMoveGen ( newLegalMovesFEN ) 
 import Bitboard ( StateComplex )
 import Move ( Move, moveComplex )
 
@@ -27,7 +28,7 @@ minimax :: Int -> Int -> Int -> StateComplex -> Int -- white wants to maximize t
 minimax 0 alpha beta sc =
     alpha `max` eval sc `min` beta -- we convert to white's centipawn
 minimax depth alpha beta sc =
-    case legalMoves sc of
+    case newLegalMovesFEN sc of
         [] -> minimax 0 alpha beta sc
         list -> cmx alpha beta $ map (moveComplex sc) list
         where
@@ -36,12 +37,12 @@ minimax depth alpha beta sc =
                 | a' >= b   = a'
                 | otherwise = cmx a' b ts where
                     a' = - minimax (depth - 1) (-b) (-a) t
--- This is actually 
 
 choose :: Int -> StateComplex -> MoveValue
 choose !depth !sc =
     minimum values
     where
         values :: [MoveValue]
-        values = map (\x -> MoveValue (x,(minimax depth minBound maxBound . moveComplex sc) x)) $ legalMoves sc
+        values = map (\x -> MoveValue (x,(minimax depth minBound maxBound . moveComplex sc) x)) $ newLegalMovesFEN sc
 {-# INLINE choose #-}
+

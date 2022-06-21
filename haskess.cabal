@@ -47,10 +47,25 @@ executable haskess
                     , Eval
                     , MoveGeneration
                     , AI
+                    , NewMoveGen
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
     extra-lib-dirs:   .
-    extra-libraries:  nnueprobe
+    extra-libraries:  nnueprobe, test
+    -- c-sources:        moveGen/test.c
+    --                 , moveGen/position.c
+    --                 , moveGen/bitboard.c
+    --                 , moveGen/genmoves.c
+    --                 , moveGen/magicmoves.c
+    --                 , moveGen/misc.c
+    --                 , moveGen/position.c
+    -- Include-dirs:   .
+    -- Includes:       moveGen/defs.h
+    --                 , moveGen/position.h
+    --                 , moveGen/misc.h
+    --                 , moveGen/bitboard.h
+    --                 , moveGen/position.h
+    --                 , moveGen/magicmoves.h
     build-depends:    base >=4.8
                     , vector >= 0.12.1.2 && < 0.13
     hs-source-dirs:   app

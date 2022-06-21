@@ -13,7 +13,7 @@ initialSC :: StateComplex
 initialSC = fENToComplex "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 testSC :: StateComplex
-testSC = fENToComplex "rnb1kbnr/pppqpppp/8/8/8/8/PPPPPPPP/RNB1KBNR w KQkq - 0 1"
+testSC = fENToComplex "r3k1nr/ppp2ppp/5q2/2bP4/2Bn2b1/2P1B3/PP3PPP/RN1QK2R w KQkq - 1 9"
 
 
 displayInCheck :: Bool -> String
@@ -33,7 +33,7 @@ play sc@(StateComplex gs bs) = do
     putStrLn ("FEN: " ++ showFEN sc)
     putStrLn "\n---------------------------------\n"
     putStrLn $ displayInCheck $ complexInCheck sc
-    let mv = choose 4 sc
+    let mv = choose 6 sc
     print mv
     let sc1 = fromJust $ moveAction sc $ move mv
     putStrLn $ showBoard $ bitboardToBoard $ bitboardState sc1
